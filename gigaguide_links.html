@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 UMRLAB — Закладки из канала</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap');
+
+        :root {
+            --green: #33ff33;
+            --green-dim: #1a9c1a;
+            --green-dark: #0a3a0a;
+            --amber: #ffb833;
+            --cyan: #33ffee;
+            --red: #ff3333;
+            --magenta: #ff33ff;
+            --bg: #050505;
+            --scanline: rgba(0, 0, 0, 0.12);
+        }
+
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            3% { opacity: 0.97; }
+            6% { opacity: 1; }
+            7.5% { opacity: 0.95; }
+            9% { opacity: 1; }
+            42% { opacity: 1; }
+            43% { opacity: 0.96; }
+            44% { opacity: 1; }
+            78% { opacity: 1; }
+            79% { opacity: 0.93; }
+            80% { opacity: 1; }
+        }
+
+        @keyframes scanlines {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 4px; }
+        }
+
+        @keyframes textShadowPulse {
+            0%, 100% { text-shadow: 0 0 8px rgba(51, 255, 51, 0.6), 0 0 20px rgba(51, 255, 51, 0.2); }
+            50% { text-shadow: 0 0 12px rgba(51, 255, 51, 0.8), 0 0 30px rgba(51, 255, 51, 0.3); }
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        @keyframes bootUp {
+            0% { opacity: 0; transform: scaleY(0.01); }
+            30% { opacity: 1; transform: scaleY(0.01); }
+            35% { transform: scaleY(1.2); }
+            40% { transform: scaleY(0.9); }
+            45% { transform: scaleY(1.05); }
+            50% { transform: scaleY(0.98); }
+            55%, 100% { transform: scaleY(1); }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'VT323', monospace;
+            background: var(--bg);
+            color: var(--green);
+            line-height: 1.5;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .crt-wrapper {
+            position: relative;
+            min-height: 100vh;
+            animation: bootUp 1.2s ease-out;
+        }
+
+        .crt-wrapper::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                var(--scanline) 2px,
+                var(--scanline) 4px
+            );
+            pointer-events: none;
+            z-index: 1000;
+            animation: scanlines 0.1s linear infinite;
+        }
+
+        .crt-wrapper::after {
+            content: '';
+            position: fixed;
+            top: -2%; left: -2%;
+            width: 104%; height: 104%;
+            background: radial-gradient(
+                ellipse at center,
+                transparent 60%,
+                rgba(0, 0, 0, 0.35) 80%,
+                rgba(0, 0, 0, 0.75) 100%
+            );
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .screen {
+            max-width: 880px;
+            margin: 0 auto;
+            padding: 30px 24px;
+            animation: flicker 4s infinite;
+        }
+
+        /* ── HEADER ── */
+        .header-box {
+            border: 2px solid var(--green-dim);
+            padding: 20px;
+            margin-bottom: 30px;
+            position: relative;
+            background: rgba(51, 255, 51, 0.02);
+        }
+
+        .header-box::before {
+            content: '┌─── CHANNEL ───┐';
+            position: absolute;
+            top: -10px; left: 16px;
+            background: var(--bg);
+            padding: 0 8px;
+            color: var(--green-dim);
+            font-size: 14px;
+        }
+
+        .logo {
+            font-size: 2.8em;
+            letter-spacing: 4px;
+            color: var(--green);
+            animation: textShadowPulse 3s ease-in-out infinite;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--green-dim);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1em;
+        }
+
+        .prompt-line {
+            color: var(--green-dim);
+            font-size: 1em;
+            margin-top: 12px;
+        }
+
+        .prompt-line .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.1em;
+            background: var(--green);
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+            margin-left: 2px;
+        }
+
+        .prompt-symbol { color: var(--cyan); }
+
+        /* ── SECTIONS ── */
+        .section {
+            margin: 28px 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--green-dark);
+        }
+
+        .section-icon {
+            font-size: 1.3em;
+            width: 28px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 1.25em;
+            color: var(--amber);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(255, 184, 51, 0.4);
+        }
+
+        .section-count {
+            color: var(--green-dim);
+            font-size: 0.85em;
+            margin-left: auto;
+        }
+
+        .subsection {
+            margin: 14px 0 6px;
+            padding-left: 4px;
+            color: var(--cyan);
+            font-size: 0.95em;
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 1px;
+        }
+
+        .subsection::before {
+            content: '── ';
+            color: var(--green-dark);
+        }
+
+        .subsection::after {
+            content: ' ──────────────────────';
+            color: var(--green-dark);
+        }
+
+        /* ── LINKS ── */
+        .links-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2px;
+        }
+
+        .link-item {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            padding: 5px 8px;
+            border-radius: 2px;
+            transition: background 0.15s;
+            font-size: 1.15em;
+        }
+
+        .link-item:hover {
+            background: rgba(51, 255, 51, 0.06);
+        }
+
+        .link-item::before {
+            content: '>';
+            color: var(--green-dim);
+            flex-shrink: 0;
+        }
+
+        .link-name {
+            color: var(--green);
+            text-decoration: none;
+            font-weight: normal;
+            transition: all 0.15s;
+        }
+
+        .link-name:hover {
+            color: #66ff66;
+            text-shadow: 0 0 12px rgba(51, 255, 51, 0.8);
+            text-decoration: underline;
+        }
+
+        .link-desc {
+            color: var(--green-dim);
+            font-size: 0.85em;
+        }
+
+        /* ── BADGES ── */
+        .badge {
+            display: inline-block;
+            padding: 0 6px;
+            font-size: 0.7em;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: 1px solid;
+            line-height: 1.6;
+            flex-shrink: 0;
+        }
+
+        .badge-free { color: var(--green); border-color: var(--green-dim); }
+        .badge-local { color: var(--magenta); border-color: rgba(255, 51, 255, 0.5); }
+        .badge-api { color: var(--cyan); border-color: rgba(51, 255, 238, 0.4); }
+        .badge-my { color: var(--amber); border-color: rgba(255, 184, 51, 0.5); }
+        .badge-social { color: var(--red); border-color: rgba(255, 51, 51, 0.5); }
+
+        /* ── TEXT BLOCK ── */
+        .text-block {
+            margin: 8px 0;
+            padding: 10px 14px;
+            border-left: 2px solid var(--green-dark);
+            color: var(--green-dim);
+            font-size: 0.95em;
+            line-height: 1.6;
+            background: rgba(51, 255, 51, 0.015);
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            text-align: center;
+            color: var(--green-dark);
+            margin: 36px 0;
+            letter-spacing: 2px;
+            font-size: 0.9em;
+            overflow: hidden;
+        }
+
+        /* ── FOOTER ── */
+        .footer {
+            text-align: center;
+            padding: 30px 20px 50px;
+            color: var(--green-dim);
+            font-size: 1em;
+            border-top: 1px dashed var(--green-dark);
+            margin-top: 20px;
+        }
+
+        .footer a {
+            color: var(--cyan);
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-shadow: 0 0 8px rgba(51, 255, 238, 0.6);
+        }
+
+        /* ── NOISE TEXTURE ── */
+        .noise {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 998;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+            background-size: 256px 256px;
+        }
+
+        .glow-top {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 120px;
+            background: linear-gradient(180deg, rgba(51, 255, 51, 0.03) 0%, transparent 100%);
+            pointer-events: none;
+            z-index: 997;
+        }
+
+        @media (max-width: 600px) {
+            .logo { font-size: 2em; letter-spacing: 2px; }
+            .screen { padding: 16px 12px; }
+            .link-item { font-size: 1.05em; }
+            .section-title { font-size: 1.1em; letter-spacing: 1px; }
+            .subsection::after { content: ' ────'; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="noise"></div>
+<div class="glow-top"></div>
+
+<div class="crt-wrapper">
+<div class="screen">
+
+<!-- ══════════════ HEADER ══════════════ -->
+<div class="header-box">
+    <div class="logo">▓ UMRLAB ▓</div>
+    <div class="subtitle">v1.0 // ЗАКЛАДКИ ИЗ ПРИВАТНОГО КАНАЛА umrlab🀄️</div>
+    <div class="prompt-line">
+        <span class="prompt-symbol">umr@lab:~$</span> cat /bookmarks/result.json | parse --links <span class="cursor"></span>
+    </div>
+</div>
+
+<!-- ═══════════════ AI SERVICES ═══════════════ -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">⚡</span>
+        <span class="section-title">AI-сервисы и инструменты</span>
+        <span class="section-count">[14]</span>
+    </div>
+    <div class="links-grid">
+        <div class="link-item"><a class="link-name" href="https://www.meshy.ai/" target="_blank">Meshy AI</a><span class="link-desc">— #1 AI-генератор 3D моделей для креаторов</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.hedra.com/app/video" target="_blank">Hedra</a><span class="link-desc">— AI-генерация видео с говорящими аватарами</span></div>
+        <div class="link-item"><a class="link-name" href="https://animateai.pro/" target="_blank">AnimateAI</a><span class="link-desc">— AI-генератор анимационных сериалов</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.maskara.ai/chats" target="_blank">Maskara AI</a><span class="link-desc">— AI-чат без ограничений</span></div>
+        <div class="link-item"><a class="link-name" href="https://enzostvs-deepsite.hf.space/" target="_blank">DeepSite</a><span class="link-desc">— генерация сайтов с помощью AI ✨</span><span class="badge badge-free">free</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.sudowrite.com/" target="_blank">Sudowrite</a><span class="link-desc">— AI-помощник для писателей</span></div>
+        <div class="link-item"><a class="link-name" href="https://voideditor.com/" target="_blank">Void Editor</a><span class="link-desc">— open-source AI-редактор кода</span><span class="badge badge-free">free</span></div>
+        <div class="link-item"><a class="link-name" href="https://app.weavy.ai" target="_blank">Weavy AI</a><span class="link-desc">— AI-платформа для совместной работы</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.openai.fm/" target="_blank">OpenAI.fm</a><span class="link-desc">— экспрессивные голоса от OpenAI</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.memenome.gg/" target="_blank">Memenome</a><span class="link-desc">— AI-анализ и генерация мемов</span></div>
+        <div class="link-item"><a class="link-name" href="https://reel.farm/" target="_blank">ReelFarm</a><span class="link-desc">— автоматизированный маркетинг рилсов</span></div>
+        <div class="link-item"><a class="link-name" href="https://accs-market.com/youtube" target="_blank">Accs Market</a><span class="link-desc">— покупка/продажа YouTube-каналов</span></div>
+        <div class="link-item"><a class="link-name" href="https://aistudio.google.com/prompts/new_chat?model=gemini-2.0-flash" target="_blank">Google AI Studio</a><span class="link-desc">— Gemini 2.0 Flash, промпт-лаборатория</span><span class="badge badge-free">free</span></div>
+        <div class="link-item"><a class="link-name" href="https://ollama.com" target="_blank">Ollama</a><span class="link-desc">— запуск LLM локально (llama3.1, qwen2.5)</span><span class="badge badge-local">local</span></div>
+    </div>
+</div>
+
+<!-- ═══════════════ AI MODELS & RESEARCH ═══════════════ -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">🧬</span>
+        <span class="section-title">Модели и исследования</span>
+        <span class="section-count">[4]</span>
+    </div>
+    <div class="links-grid">
+        <div class="link-item"><a class="link-name" href="https://huggingface.co/openai/gpt-oss-120b" target="_blank">GPT-OSS 120B</a><span class="link-desc">— open-source GPT модель от OpenAI на HuggingFace</span><span class="badge badge-free">free</span></div>
+        <div class="link-item"><a class="link-name" href="https://deepmind.google/discover/blog/genie-3-a-new-frontier-for-world-models/" target="_blank">Genie 3</a><span class="link-desc">— DeepMind, новый рубеж мировых моделей</span></div>
+        <div class="link-item"><a class="link-name" href="https://share.google/CUJzqLhVZM3ErIIjT" target="_blank">Gemini Code Assist</a><span class="link-desc">— расширение VS Code от Google для AI-кодинга</span><span class="badge badge-free">free</span></div>
+        <div class="link-item"><a class="link-name" href="https://github.com/enescingoz/awesome-n8n-templates" target="_blank">Awesome n8n Templates</a><span class="link-desc">— коллекция шаблонов автоматизации n8n</span><span class="badge badge-free">free</span></div>
+    </div>
+</div>
+
+<!-- ═══════════════ LEARNING ═══════════════ -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">📚</span>
+        <span class="section-title">Обучение и гайды</span>
+        <span class="section-count">[3]</span>
+    </div>
+    <div class="links-grid">
+        <div class="link-item"><a class="link-name" href="https://www.kaggle.com/whitepaper-prompt-engineering" target="_blank">Google Prompt Engineering</a><span class="link-desc">— мануал на 68 стр., все стратегии промптинга</span><span class="badge badge-free">free</span></div>
+        <div class="link-item"><a class="link-name" href="https://academy.openai.com/" target="_blank">OpenAI Academy</a><span class="link-desc">— бесплатные курсы от OpenAI (RAG, Sora и др.)</span><span class="badge badge-free">free</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.feedough.com/ai-product-requirements-document-prd-generator/" target="_blank">AI PRD Generator</a><span class="link-desc">— генератор технических заданий на продукт</span><span class="badge badge-free">free</span></div>
+    </div>
+</div>
+
+<!-- ═══════════════ VIBE CODING ═══════════════ -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">🏗️</span>
+        <span class="section-title">Вайб-кодинг</span>
+        <span class="section-count">[16]</span>
+    </div>
+    <div class="text-block">
+        Все ИИ-сервисы для вайб-кодинга — из подборки канала «Вот это да!»
+    </div>
+    <div class="links-grid">
+        <div class="link-item"><a class="link-name" href="https://www.cursor.com/" target="_blank">Cursor</a><span class="link-desc">— лучший для AI-кодинга, 7 дней бесплатно</span></div>
+        <div class="link-item"><a class="link-name" href="https://bolt.new/" target="_blank">Bolt.new</a><span class="link-desc">— рабочий сайт по одному промпту</span></div>
+        <div class="link-item"><a class="link-name" href="https://blackbox.ai/" target="_blank">Blackbox AI</a><span class="link-desc">— веб/мобильные/десктоп приложения и игры</span></div>
+        <div class="link-item"><a class="link-name" href="https://magicpatterns.com/" target="_blank">Magic Patterns</a><span class="link-desc">— дизайн + синхронизация с Figma</span></div>
+        <div class="link-item"><a class="link-name" href="https://lovable.dev/" target="_blank">Lovable.dev</a><span class="link-desc">— для тех, кто не умеет программировать</span></div>
+        <div class="link-item"><a class="link-name" href="https://wrapifai.com/" target="_blank">Wrapifai</a><span class="link-desc">— мини-инструменты для SEO и лид-магнитов</span></div>
+        <div class="link-item"><a class="link-name" href="https://codeium.com/windsurf" target="_blank">Windsurf</a><span class="link-desc">— упрощённая версия Cursor</span></div>
+        <div class="link-item"><a class="link-name" href="https://replit.com/" target="_blank">Replit</a><span class="link-desc">— генератор приложений с БД и хостингом, работает с телефона</span></div>
+        <div class="link-item"><a class="link-name" href="https://v0.dev/" target="_blank">v0 by Vercel</a><span class="link-desc">— лучший ИИ для создания веб-страниц</span></div>
+        <div class="link-item"><a class="link-name" href="https://base44.com/" target="_blank">Base44</a><span class="link-desc">— генератор приложений без кодирования</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.creatr.ai/" target="_blank">Creatr</a><span class="link-desc">— идеален для тех, кто не умеет кодить</span></div>
+        <div class="link-item"><a class="link-name" href="https://trae.ai/" target="_blank">Trae</a><span class="link-desc">— бесплатный AI-ассистент с Claude 3.7</span><span class="badge badge-free">free</span></div>
+        <div class="link-item"><a class="link-name" href="https://webdraw.com/" target="_blank">Webdraw</a><span class="link-desc">— эскизы → веб-приложения бесплатно</span><span class="badge badge-free">free</span></div>
+        <div class="link-item"><a class="link-name" href="https://softgen.ai/" target="_blank">Softgen AI</a><span class="link-desc">— мощный AI-агент для no-code</span></div>
+        <div class="link-item"><a class="link-name" href="https://animaapp.com/" target="_blank">Anima</a><span class="link-desc">— идеальный ИИ для дизайнеров</span></div>
+        <div class="link-item"><a class="link-name" href="https://github.com/cline/cline" target="_blank">Cline</a><span class="link-desc">— AI-кодер для небольших проектов</span><span class="badge badge-free">free</span></div>
+    </div>
+</div>
+
+<!-- ═══════════════ PROMPTS ═══════════════ -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">✍️</span>
+        <span class="section-title">Промпты и хаки</span>
+        <span class="section-count">[3]</span>
+    </div>
+
+    <div class="subsection">ChatGPT Custom Instructions</div>
+    <div class="text-block">
+        Системный промпт для ChatGPT: автоматический выбор роли эксперта, step-by-step рассуждение, структурированные ответы с разделами Expert Role, Objective, Reasoning, Answer, Questions и Reflection.
+    </div>
+
+    <div class="subsection">7 промптов для «очеловечивания» текстов</div>
+    <div class="text-block">
+        🔴 <b>Настройка стиля</b> — извлечь тон, ритм и особенности<br>
+        🔴 <b>Добавление эмоций</b> — сторителлинг и ударные концовки<br>
+        🔴 <b>Фильтр аутентичности</b> — замена шаблонных фраз<br>
+        🔴 <b>Персонализация</b> — разговорные фразы без потери ясности<br>
+        🔴 <b>Подстройка под аудиторию</b> — язык, боли, убеждения<br>
+        🔴 <b>Расширение идей</b> — мысль → полноценный пост<br>
+        🔴 <b>Цикл человечности</b> — 2 версии + итеративная доработка
+    </div>
+
+    <div class="subsection">VEO3 JSON промпт</div>
+    <div class="text-block">
+        Структурированный JSON-промпт для Google Veo 3: shot (композиция, объектив, камера), subject (описание, костюмы, реквизит), scene (локация, время, окружение), visual_details (действие, спецэффекты), cinematography (свет, палитра, тон), audio (музыка, амбиент, SFX), dialogue.
+    </div>
+</div>
+
+<!-- ═══════════════ YOUTUBE ═══════════════ -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">🎬</span>
+        <span class="section-title">YouTube-видео</span>
+        <span class="section-count">[5]</span>
+    </div>
+    <div class="links-grid">
+        <div class="link-item"><a class="link-name" href="https://youtu.be/ZUHsAlKcMOM" target="_blank">YouTube: ZUHsAlKcMOM</a><span class="link-desc">— видео-гайд (дек 2024)</span></div>
+        <div class="link-item"><a class="link-name" href="https://youtu.be/fgdAjIGmKUI" target="_blank">YouTube: fgdAjIGmKUI</a><span class="link-desc">— видео-урок (янв 2025)</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.youtube.com/watch?v=XaKybLDUlLk" target="_blank">AlexK1919</a><span class="link-desc">— видео от AlexK1919 (фев 2025)</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.youtube.com/watch?v=UPCul37e-M0" target="_blank">AI Workshop</a><span class="link-desc">— AI Workshop (фев 2025)</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.youtube.com/watch?v=K-cTuj_QVac" target="_blank">Andy Lo</a><span class="link-desc">— видео от Andy Lo (фев 2025)</span></div>
+    </div>
+</div>
+
+<!-- ═══════════════ X/TWITTER ═══════════════ -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">🐦</span>
+        <span class="section-title">X (Twitter) посты</span>
+        <span class="section-count">[10]</span>
+    </div>
+    <div class="links-grid">
+        <div class="link-item"><a class="link-name" href="https://x.com/williambeaird_/status/1850653739910099402" target="_blank">@williambeaird_</a><span class="link-desc">— пост (окт 2024)</span><span class="badge badge-social">x</span></div>
+        <div class="link-item"><a class="link-name" href="https://x.com/Adam_DelDuca/status/1867903118425608213" target="_blank">@Adam_DelDuca</a><span class="link-desc">— пост (дек 2024)</span><span class="badge badge-social">x</span></div>
+        <div class="link-item"><a class="link-name" href="https://x.com/elder_plinius/status/1881375580802949626" target="_blank">@elder_plinius</a><span class="link-desc">— jailbreak промпты (янв 2025)</span><span class="badge badge-social">x</span></div>
+        <div class="link-item"><a class="link-name" href="https://x.com/Saboo_Shubham_/status/1884080792231633225" target="_blank">@Saboo_Shubham_</a><span class="link-desc">— AI-инструменты (янв 2025)</span><span class="badge badge-social">x</span></div>
+        <div class="link-item"><a class="link-name" href="https://x.com/tom_doerr/status/1884220763852415209" target="_blank">@tom_doerr</a><span class="link-desc">— AI и разработка (янв 2025)</span><span class="badge badge-social">x</span></div>
+        <div class="link-item"><a class="link-name" href="https://x.com/bilawalsidhu/status/1901078553736999340" target="_blank">@bilawalsidhu</a><span class="link-desc">— AI-контент (мар 2025)</span><span class="badge badge-social">x</span></div>
+        <div class="link-item"><a class="link-name" href="https://x.com/AIWarper/status/1901722363580109101" target="_blank">@AIWarper</a><span class="link-desc">— AI-инструменты (мар 2025)</span><span class="badge badge-social">x</span></div>
+        <div class="link-item"><a class="link-name" href="https://x.com/EHuanglu/status/1902167298238247226" target="_blank">@EHuanglu</a><span class="link-desc">— AI-пост (мар 2025)</span><span class="badge badge-social">x</span></div>
+        <div class="link-item"><a class="link-name" href="https://x.com/TubeLabHQ/status/1903227600639820035" target="_blank">@TubeLabHQ</a><span class="link-desc">— YouTube автоматизация (мар 2025)</span><span class="badge badge-social">x</span></div>
+        <div class="link-item"><a class="link-name" href="https://x.com/YouTuPreneur/status/1908863787437867261" target="_blank">@YouTuPreneur</a><span class="link-desc">— YouTube-контент (апр 2025)</span><span class="badge badge-social">x</span></div>
+    </div>
+</div>
+
+<!-- ═══════════════ TIKTOK ═══════════════ -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">📱</span>
+        <span class="section-title">TikTok-видео</span>
+        <span class="section-count">[30]</span>
+    </div>
+    <div class="text-block">
+        Коллекция TikTok-видео по AI, автоматизации и контенту. Отсортировано по дате.
+    </div>
+    <div class="links-grid">
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8FbpNjN/" target="_blank">TikTok #1</a><span class="link-desc">— янв 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8Fp5ppw/" target="_blank">TikTok #2</a><span class="link-desc">— янв 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8YNxm57/" target="_blank">TikTok #3</a><span class="link-desc">— фев 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8YjTVYu/" target="_blank">TikTok #4</a><span class="link-desc">— фев 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8YpBA5s/" target="_blank">TikTok #5</a><span class="link-desc">— фев 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8YpegjN/" target="_blank">TikTok #6</a><span class="link-desc">— фев 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8YW1hwK/" target="_blank">TikTok #7</a><span class="link-desc">— фев 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP826nf58/" target="_blank">TikTok #8</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP82rDcB6/" target="_blank">TikTok #9</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP82koqff/" target="_blank">TikTok #10</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP82fWmgp/" target="_blank">TikTok #11</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP825WUsp/" target="_blank">TikTok #12</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP825o1N6/" target="_blank">TikTok #13</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8253Fvv/" target="_blank">TikTok #14</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP82HbcSa/" target="_blank">TikTok #15</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP82gQV8Q/" target="_blank">TikTok #16</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP82gW95x/" target="_blank">TikTok #17</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP82gVT42/" target="_blank">TikTok #18</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP82tUDcu/" target="_blank">TikTok #19</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP823HDeq/" target="_blank">TikTok #20</a><span class="link-desc">— мар 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8jYq7wS/" target="_blank">TikTok #21</a><span class="link-desc">— апр 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8jYcqJM/" target="_blank">TikTok #22</a><span class="link-desc">— апр 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8jHYxLN/" target="_blank">TikTok #23</a><span class="link-desc">— апр 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8jVKhfN/" target="_blank">TikTok #24</a><span class="link-desc">— апр 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP86K3fG9/" target="_blank">TikTok #25</a><span class="link-desc">— май 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP86ogKNH/" target="_blank">TikTok #26</a><span class="link-desc">— май 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8MbEXgK/" target="_blank">TikTok #27</a><span class="link-desc">— июн 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8MgWM5t/" target="_blank">TikTok #28</a><span class="link-desc">— июн 2025</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8Mg9Gqw/" target="_blank">TikTok #29</a><span class="link-desc">— июн 2025 (VEO3 промпт)</span><span class="badge badge-social">tt</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.tiktok.com/t/ZP8rkyqsG/" target="_blank">TikTok #30</a><span class="link-desc">— июн 2025</span><span class="badge badge-social">tt</span></div>
+    </div>
+</div>
+
+<!-- ═══════════════ OTHER SOCIAL ═══════════════ -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">🔗</span>
+        <span class="section-title">Социальные сети</span>
+        <span class="section-count">[3]</span>
+    </div>
+    <div class="links-grid">
+        <div class="link-item"><a class="link-name" href="https://www.instagram.com/reel/DBvfy4_tHwb/" target="_blank">Instagram Reel</a><span class="link-desc">— рилс (дек 2024)</span><span class="badge badge-social">ig</span></div>
+        <div class="link-item"><a class="link-name" href="https://www.instagram.com/irinagivis" target="_blank">@irinagivis</a><span class="link-desc">— Instagram-профиль (июн 2025)</span><span class="badge badge-social">ig</span></div>
+        <div class="link-item"><a class="link-name" href="https://t.me/salikov_i" target="_blank">Вот это да!</a><span class="link-desc">— Telegram-канал с AI-подборками</span><span class="badge badge-social">tg</span></div>
+    </div>
+</div>
+
+<!-- ═══════════════ BOT PROJECT ═══════════════ -->
+<div class="section">
+    <div class="section-header">
+        <span class="section-icon">🤖</span>
+        <span class="section-title">Проект: Telegram-бот транскрипции</span>
+        <span class="section-count">[1]</span>
+    </div>
+    <div class="text-block">
+        Бот для Telegram — принимает видео/голос/аудио или ссылку (YouTube, TikTok, Twitter), делает <b>локальную транскрипцию</b> через faster-whisper и выдаёт <b>одно предложение-саммари</b>. Можно использовать Ollama (офлайн) или OpenAI (онлайн).
+    </div>
+    <div class="links-grid">
+        <div class="link-item"><a class="link-name" href="https://ollama.com" target="_blank">Ollama</a><span class="link-desc">— бэкенд для локального саммари (llama3.1:8b)</span><span class="badge badge-local">local</span></div>
+    </div>
+</div>
+
+<div class="divider">════════════════════ EOF ════════════════════</div>
+
+<div class="footer">
+    <p>Парсинг из приватного канала umrlab🀄️ // result.json<br>
+    <span class="prompt-symbol">umr@lab:~$</span> echo "Всего сообщений: ~140 | Ссылок: 80+ | Категорий: 9"</p>
+</div>
+
+</div>
+</div>
+
+</body>
+</html>
